@@ -32,11 +32,11 @@ libz-version       = zlib-1.2.8
 liblzo-version     = lzo-2.06
 
 glibc-url          = https://ftp.gnu.org/gnu/libc/$(glibc-version).tar.gz
-libtalloc-url      = https://www.samba.org/ftp/talloc/talloc-$(talloc-version).tar.gz
+libtalloc-url      = https://www.samba.org/ftp/talloc/$(libtalloc-version).tar.gz
 proot-url          = https://github.com/proot-me/PRoot.git
-libarchive-url     = http://libarchive.org/downloads/libarchive-$(libarchive-version).tar.gz
-libz-url           = http://www.zlib.net/fossils/zlib-$(libz-version).tar.gz
-liblzo-url         = http://www.oberhumer.com/opensource/lzo/download/lzo-$(liblzo-version).tar.gz
+libarchive-url     = http://libarchive.org/downloads/$(libarchive-version).tar.gz
+libz-url           = http://www.zlib.net/fossils/$(libz-version).tar.gz
+liblzo-url         = http://www.oberhumer.com/opensource/lzo/download/$(liblzo-version).tar.gz
 
 glibc-license      = sh -c '$(pkg)/lib/libc.so.6; cat $(glibc-version)/LICENSES; head -n 16 $(glibc-version)/io/open.c'
 libtalloc-license  = head -n 27 $(libtalloc-version)/talloc.c
