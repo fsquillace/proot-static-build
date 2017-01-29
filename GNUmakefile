@@ -38,11 +38,11 @@ libarchive-url     = http://libarchive.org/downloads/$(libarchive-version).tar.g
 libz-url           = http://www.zlib.net/fossils/$(libz-version).tar.gz
 liblzo-url         = http://www.oberhumer.com/opensource/lzo/download/$(liblzo-version).tar.gz
 
-glibc-license      = sh -c '$(pkg)/lib/libc.so.6; cat $(glibc-version)/LICENSES; head -n 16 $(glibc-version)/io/open.c'
-libtalloc-license  = head -n 27 $(libtalloc-version)/talloc.c
-libarchive-license = cat $(libarchive-version)/COPYING
-libz-license       = head -n 29 $(libz-version)/zlib.h
-liblzo-license     = head -n 41 $(liblzo-version)/src/lzo1.c
+glibc-license      = sh -c '$(pkg)/lib/libc.so.6; cat $(src)/$(glibc-version)/LICENSES; head -n 16 $(src)/$(glibc-version)/io/open.c'
+libtalloc-license  = head -n 27 $(src)/$(libtalloc-version)/talloc.c
+libarchive-license = cat $(src)/$(libarchive-version)/COPYING
+libz-license       = head -n 29 $(src)/$(libz-version)/zlib.h
+liblzo-license     = head -n 41 $(src)/$(liblzo-version)/src/lzo1.c
 
 libc_a       = $(pkg)/lib/libc.a
 libtalloc_a  = $(pkg)/lib/libtalloc.a
@@ -113,21 +113,21 @@ $(liblzo_a): $(libc_a)
 
 all_libs_a = $(libc_a) $(libtalloc_a) $(libarchive_a) $(libz_a) $(liblzo_a)
 
-proot-licenses: $(libc_a) $(libtalloc_a)
-	@echo "" >> $@
-	@echo "This version of PRoot is statically linked to the following software." >> $@
-	@echo "------------------------------------------------------------------------" >> $@
-	@echo "glibc:" >> $@
-	@echo "" >> $@
-	@$(glibc-license) >> $@
-	@echo "------------------------------------------------------------------------" >> $@
-	@echo "libtalloc:" >> $@
-	@echo "" >> $@
-	@$(libtalloc-license) >> $@
-	@echo "------------------------------------------------------------------------" >> $@
-	@echo "The build-system, sources and licences are available on:" >> $@
-	@echo "" >> $@
-	@echo "    https://github.com/cedric-vincent/proot-static-build">> $@
+proot-licenses: mk_build_dirs $(libc_a) $(libtalloc_a)
+	@echo "" >> $(src)/$@
+	@echo "This version of PRoot is statically linked to the following software." >> $(src)/$@
+	@echo "------------------------------------------------------------------------" >> $(src)/$@
+	@echo "glibc:" >> $(src)/$@
+	@echo "" >> $(src)/$@
+	@$(glibc-license) >> $(src)/$@
+	@echo "------------------------------------------------------------------------" >> $(src)/$@
+	@echo "libtalloc:" >> $(src)/$@
+	@echo "" >> $(src)/$@
+	@$(libtalloc-license) >> $(src)/$@
+	@echo "------------------------------------------------------------------------" >> $(src)/$@
+	@echo "The build-system, sources and licences are available on:" >> $(src)/$@
+	@echo "" >> $(src)/$@
+	@echo "    https://github.com/cedric-vincent/proot-static-build">> $(src)/$@
 
 care-licenses: $(all_libs_a)
 	@echo "" >> $@
@@ -183,7 +183,7 @@ care: $(all_libs_a) care-licenses
 	env OBJECTS="cli/care-licenses.o" LDFLAGS="-static -L$(pkg)/lib -larchive -lz -llzo2" CPPFLAGS="-isystem $(pkg)/include -DCARE_BINARY_IS_PORTABLE " $(MAKE) -C $(care-version)/src/ care GIT=false        && \
 	cp $(care-version)/src/$@ .
 
-proot: $(mk_build_dirs) $(libc_a) $(libtalloc_a) proot-licenses
+proot: mk_build_dirs $(libc_a) $(libtalloc_a) proot-licenses
 	cd $(src)                                          && \
 	git clone $(proot-url) $(proot-version)            && \
 	cp proot-licenses $(proot-version)/src/licenses    && \
