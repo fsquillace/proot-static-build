@@ -1,10 +1,3 @@
-# How to build PRoot:
-#
-#     make proot
-#
-# To clean:
-#
-#     make clean
 
 proot-version      = proot
 glibc-version      = glibc-2.19
@@ -14,19 +7,24 @@ glibc-url          = https://ftp.gnu.org/gnu/libc/$(glibc-version).tar.gz
 libtalloc-url      = https://www.samba.org/ftp/talloc/$(libtalloc-version).tar.gz
 proot-url          = https://github.com/proot-me/PRoot.git
 
+proot-branch       = master
+
 glibc-license      = sh -c '$(pkg)/lib/libc.so.6; cat $(src)/$(glibc-version)/LICENSES; head -n 16 $(src)/$(glibc-version)/io/open.c'
 libtalloc-license  = head -n 27 $(src)/$(libtalloc-version)/talloc.c
 
-libc_a       = $(pkg)/lib/libc.a
-libtalloc_a  = $(pkg)/lib/libtalloc.a
+libc_a             = $(pkg)/lib/libc.a
+libtalloc_a        = $(pkg)/lib/libtalloc.a
+all_libs_a         = $(libc_a) $(libtalloc_a)
 
-env = CFLAGS="-g -O2 -isystem $(pkg)/include" LDFLAGS="-L$(pkg)/lib"
+env                = CFLAGS="-g -O2 -isystem $(pkg)/include" LDFLAGS="-L$(pkg)/lib"
 
-src = $(PWD)/src
-pkg = $(PWD)/pkg
+mkfile_dir         = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+src                = $(mkfile_dir)src
+pkg                = $(mkfile_dir)pkg
+out                = $(mkfile_dir)out
 
 mk_build_dirs:
-	mkdir $(src) $(pkg)
+	mkdir $(src) $(pkg) $(out)
 
 $(libc_a): mk_build_dirs
 	cd $(src)                                              && \
@@ -48,8 +46,6 @@ $(libtalloc_a): mk_build_dirs $(libc_a)
 	  $(MAKE) install                                      && \
 	  ar qf $@ bin/default/talloc_3.o
 
-all_libs_a = $(libc_a) $(libtalloc_a)
-
 proot-licenses: mk_build_dirs $(libc_a) $(libtalloc_a)
 	@echo "" >> $(src)/$@
 	@echo "This version of PRoot is statically linked to the following software." >> $(src)/$@
@@ -67,11 +63,11 @@ proot-licenses: mk_build_dirs $(libc_a) $(libtalloc_a)
 	@echo "    https://github.com/proot-me/proot-static-build">> $(src)/$@
 
 proot: mk_build_dirs $(libc_a) $(libtalloc_a) proot-licenses
-	cd $(src)                                          && \
-	git clone $(proot-url) $(proot-version)            && \
-	cp proot-licenses $(proot-version)/src/licenses    && \
+	cd $(src)                                                       && \
+	git clone -b $(proot-branch) $(proot-url) $(proot-version)      && \
+	cp proot-licenses $(proot-version)/src/licenses                 && \
 	env OBJECTS="cli/proot-licenses.o" LDFLAGS="-static -L$(pkg)/lib" CPPFLAGS="-isystem $(pkg)/include" $(MAKE) -C $(proot-version)/src/ GIT=false           && \
-	cp $(proot-version)/src/$@ .
+	cp $(proot-version)/src/$@ $(out)
 
 clean:
-	rm -rf $(src) $(pkg)
+	rm -rf $(src) $(pkg) $(out)
